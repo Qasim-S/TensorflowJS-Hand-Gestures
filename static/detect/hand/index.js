@@ -11,13 +11,23 @@ webcamLaunch();
 (async function () {
   // Load the MediaPipe handpose model assets.
   const model = await handpose.load();
+  console.log("got the model...");
 
   // Pass in a video stream to the model to obtain
   // a prediction from the MediaPipe graph.
   const video = document.querySelector("video");
-  const hands = await model.estimateHands(video);
+  console.log("got the stream...");
 
-  // Each hand object contains a `landmarks` property,
-  // which is an array of 21 3-D landmarks.
-  hands.forEach((hand) => console.log(hand.landmarks));
+  video.onloadeddata = () => {
+    while (true) {
+      console.log("getting hands...");
+      model.estimateHands(video).then((hands) => {
+        console.log("got the hands...");
+
+        // Each hand object contains a `landmarks` property,
+        // which is an array of 21 3-D landmarks.
+        hands.forEach((hand) => console.log(hand.landmarks));
+      });
+    }
+  };
 })();
