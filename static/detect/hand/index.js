@@ -1,33 +1,52 @@
-async function webcamLaunch() {
-  const display = document.getElementById("display");
-  const videoElement = document.createElement("video"); // Add element to display the webcam image.
-  display.appendChild(videoElement);
-  videoElement.width = 500;
-  videoElement.height = 500;
-  const webcamIterator = await tf.data.webcam(videoElement);
+const enableWebcamButton = document.getElementById("webcamButton");
+const disableWebcamButton = document.getElementById("webcamButtonDisable");
+const video = document.getElementById("webcam");
+
+// Check if webcam access is supported.
+function getUserMediaSupported() {
+  return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
 }
-webcamLaunch();
 
-(async function () {
-  // Load the MediaPipe handpose model assets.
-  const model = await handpose.load();
-  console.log("got the model...");
+// If webcam supported, add event listener to button for when user
+// wants to activate it to call enableCam function which we will
+// define in the next step.
+if (getUserMediaSupported()) {
+  enableWebcamButton.addEventListener("click", enableCam);
+  disableWebcamButton.addEventListener("click", disableCam);
+} else {
+  console.warn("getUserMedia() is not supported by your browser");
+}
 
-  // Pass in a video stream to the model to obtain
-  // a prediction from the MediaPipe graph.
-  const video = document.querySelector("video");
-  console.log("got the stream...");
+// Enable the live webcam view and start classification.
+function enableCam(event) {
+  // Only continue if the COCO-SSD has finished loading.
+  if (!model) {
+    return;
+  }
 
-  video.onloadeddata = () => {
-    while (true) {
-      console.log("getting hands...");
-      model.estimateHands(video).then((hands) => {
-        console.log("got the hands...");
-
-        // Each hand object contains a `landmarks` property,
-        // which is an array of 21 3-D landmarks.
-        hands.forEach((hand) => console.log(hand.landmarks));
-      });
-    }
+  // getUsermedia parameters to force video but not audio.
+  const constraints = {
+    video: true,
   };
-})();
+
+  // Activate the webcam stream.
+  navigator.mediaDevices.getUserMedia(constraints).then(function (stream) {
+    window.localStream = stream;
+    video.srcObject = stream;
+    video.style.visibility = "visible";
+    video.addEventListener("loadeddata", predictWebcam);
+  });
+}
+
+// Placeholder function for next step.
+function predictWebcam() {}
+
+// Pretend model has loaded so we can try out the webcam code.
+var model = true;
+
+// Disable the webcam
+function disableCam() {
+  localStream.getVideoTracks()[0].stop();
+  video.src = "";
+  video.style.visibility = "hidden";
+}
