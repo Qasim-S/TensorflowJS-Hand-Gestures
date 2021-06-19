@@ -38,11 +38,31 @@ function enableCam(event) {
   });
 }
 
-// Placeholder function for next step.
-function predictWebcam() {}
+// Store the resulting model in the global scope of our app.
+var model = undefined;
 
-// Pretend model has loaded so we can try out the webcam code.
-var model = true;
+// Before we can use Handpose class we must wait for it to finish
+// loading. Machine Learning models can be large and take a moment
+// to get everything needed to run.
+// handpose is an external object loaded from our index.html
+handpose.load().then(function (loadedModel) {
+  model = loadedModel;
+  console.log("Got the model...");
+});
+
+// Placeholder function for next step.
+function predictWebcam() {
+  // Estimating the hands in a frame
+  console.log("Getting the hands...");
+  model.estimateHands(video).then(function (hands) {
+    console.log("Got the hands...");
+
+    hands.forEach((hand, i) => console.log(hand.landmarks));
+  });
+
+  // Call this function again to keep predicting when the browser is ready.
+  window.requestAnimationFrame(predictWebcam);
+}
 
 // Disable the webcam
 function disableCam() {
