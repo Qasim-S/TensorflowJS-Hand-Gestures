@@ -10,21 +10,36 @@
     <style>
         body {
             font-family: Comic Sans MS, Comic Sans, Cursive;
+            background: #000000;
+            color: #ffffff;
+        }
+
+        .main-area {
+            border: 5px solid #ffffff;
+            border-radius: 25px;
+            padding: 20px;
+            margin-top: 5%;
+        }
+
+        video {
+            /* override other styles to make responsive */
+            width: 100%    !important;
+            height: auto   !important;
         }
     </style>
 </head>
 <body>
 
-    <div class="container">
+    <div class="container main-area">
         <div class="row">
           <div class="col-sm-6">
             <div class="d-flex justify-content-center">
-                <video id="webcam" width="500" height="400" autoplay></video>
+                <video id="webcam" autoplay></video>
             </div>
 
-            <div class="text-center">
-                <button id="webcamButton" type="button" class="btn btn-success" style="margin-right: 10px;">Capture</button>
-                <button id="webcamButtonDisable" type="button" class="btn btn-warning" style="margin-left: 10px;">Stop</button>
+            <div class="text-center" style="margin-top: 4%;">
+                <button id="webcamButton" type="button" class="btn btn-outline-light" style="margin-right: 10px;">Capture</button>
+                <button id="webcamButtonDisable" type="button" class="btn btn-outline-light" style="margin-left: 10px;">Stop</button>
             </div>
           </div>
           <div class="col-sm-6">
