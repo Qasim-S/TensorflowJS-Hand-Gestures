@@ -5,6 +5,8 @@ To run:
 
 $ cd local-server
 
+$ npm install
+
 $ npm run start (runs with nodemon)
 
 GOTO:
