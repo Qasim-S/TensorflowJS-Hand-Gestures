@@ -2,9 +2,6 @@ const enableWebcamButton = document.getElementById("webcamButton");
 const disableWebcamButton = document.getElementById("webcamButtonDisable");
 const video = document.getElementById("webcam");
 const liveView = document.getElementById("liveView");
-const display = document.getElementById("display");
-const topLeft = document.getElementById("topLeft");
-const bottomRight = document.getElementById("bottomRight");
 
 // Check if webcam access is supported.
 function getUserMediaSupported() {
@@ -48,8 +45,15 @@ var model = undefined;
 // Before we can use Handpose class we must wait for it to finish
 // loading. Machine Learning models can be large and take a moment
 // to get everything needed to run.
-// handpose is an external object loaded from our index.html
-handpose.load().then(function (loadedModel) {
+// handTrack is an external object loaded from our index.html
+const modelParams = {
+  flipHorizontal: true,
+  maxNumBoxes: 20,
+  iouThreshold: 0.5,
+  scoreThreshold: 0.66,
+};
+
+handTrack.load(modelParams).then(function (loadedModel) {
   model = loadedModel;
   console.log("Got the model...");
 });
@@ -60,8 +64,8 @@ var children = [];
 function predictWebcam() {
   // Estimating the hands in a frame
   console.log("Getting the hands...");
-  model.estimateHands(video).then(function (hands) {
-    console.log("Got the hands...");
+  model.detect(video).then(function (predictions) {
+    console.log(predictions);
 
     // Remove any highlighting we did previous frame.
     for (let i = 0; i < children.length; i++) {
@@ -69,40 +73,28 @@ function predictWebcam() {
     }
     children.splice(0);
 
-    hands.forEach((hand, i) => {
+    predictions.forEach((prediction, i) => {
       // If we are over 66% sure we are sure we detected it right, draw the bounding box!
-      if (hand.handInViewConfidence > 0.66) {
-        /*
-            tL = boundingBox.topLeft
-            bR = boundingBox.bottomRight
-            tR = [bR[0] - tL[0], tL[1]]
-            bL = [tL[0], bR[1]]
-        */
+      //   if (prediction.score > 0.66) {
+      console.log("Has a hand...");
+      //  Getting the bounding box coordinates from the handTrack prediction
+      let left = prediction.bbox[0];
+      let top = prediction.bbox[1];
+      let width = prediction.bbox[2];
+      let height = prediction.bbox[3];
 
-        let left = Math.abs(hand.boundingBox.topLeft[0]);
-        let top = Math.abs(hand.boundingBox.topLeft[1]);
-        let width = Math.abs(
-          hand.boundingBox.bottomRight[0] - hand.boundingBox.topLeft[0]
-        );
-        let height = Math.abs(
-          hand.boundingBox.topLeft[1] - hand.boundingBox.bottomRight[1]
-        );
+      // Creating the highlighter div
+      const highlighter = document.createElement("div");
+      highlighter.setAttribute("class", "highlighter");
+      highlighter.style = `left: ${left}px; top: ${top}px; width: ${width}px; height: ${height}px;`;
 
-        // Creating the highlighter div
-        const highlighter = document.createElement("div");
-        highlighter.setAttribute("class", "highlighter");
-        highlighter.style = `left: ${left}px; top: ${top}px; width: ${width}px; height: ${height}px;`;
+      // Appending the highlighter to the 'liveView' div
+      liveView.appendChild(highlighter);
 
-        // Appending the highlighter to the 'liveView' div
-        liveView.appendChild(highlighter);
-
-        topLeft.innerHTML = `(${hand.boundingBox.topLeft[0]}, ${hand.boundingBox.topLeft[1]})`;
-        bottomRight.innerHTML = `(${hand.boundingBox.bottomRight[0]}, ${hand.boundingBox.bottomRight[1]})`;
-
-        // Storing the highlighter in the 'children' list for deleting it safely
-        // when processing the next frame
-        children.push(highlighter);
-      }
+      // Storing the highlighter in the 'children' list for deleting it safely
+      // when processing the next frame
+      children.push(highlighter);
+      //   }
     });
   });
 
