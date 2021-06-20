@@ -3,6 +3,7 @@ const canvas = document.getElementById("canvas");
 const context = canvas.getContext("2d");
 let trackButton = document.getElementById("webcamButton");
 let updateNote = document.getElementById("updatenote");
+let croppedCanvas = document.getElementById("croppedImage");
 
 let isVideo = false;
 let model = null;
@@ -44,6 +45,48 @@ function runDetection() {
   model.detect(video).then((predictions) => {
     console.log("Predictions: ", predictions);
     model.renderPredictions(predictions, canvas, context, video);
+    predictions.forEach((prediction, i) => {
+      if (prediction.label != "face") {
+        // const topLeft = [prediction.bbox[0], prediction.bbox[1]];
+        // const bottomRight = [
+        //   prediction.bbox[0] + prediction.bbox[2],
+        //   prediction.bbox[1] + prediction.bbox[3],
+        // ];
+        // Boxes in cropAndResize require to be normalized
+        // boxes = tf
+        //   .concat([tf.tensor(topLeft), tf.tensor(bottomRight)])
+        //   .reshape([-1, 4]);
+        // tf.browser.fromPixels(video).print();
+        // console.log("Original Shape: ", tf.browser.fromPixels(video).shape);
+        // console.log(
+        //   "Transformed Shape: ",
+        //   imgTransform(tf.browser.fromPixels(video).shape)
+        // );
+        console.log(
+          "Image from web cam (shape): ",
+          tf.browser.fromPixels(video).shape
+        );
+        console.log(
+          "Transformed image from web cam (shape): ",
+          imgTransform(tf.browser.fromPixels(video).shape)
+        );
+        console.log("Bounding box (shape):", tf.tensor(prediction.bbox).shape);
+        // crop = tf.image.cropAndResize(
+        //   tf.browser.fromPixels(video).div(255).expandDims(),
+        //   tf
+        //     .tensor(prediction.bbox)
+        //     .div(tf.browser.fromPixels(video).shape[0])
+        //     .reshape([1, 4]),
+        //   [0],
+        //   [224, 224]
+        // );
+        // tf.browser
+        //   .toPixels(crop.reshape([224, 224, 3]), croppedCanvas)
+        //   .then(() => {
+        //     crop.dispose();
+        //   });
+      }
+    });
     if (isVideo) {
       requestAnimationFrame(runDetection);
     }
@@ -57,3 +100,47 @@ handTrack.load(modelParams).then((lmodel) => {
   updateNote.innerText = "Loaded Model!";
   trackButton.disabled = false;
 });
+
+function imgTransform(img) {
+  img = tf.image.resizeBilinear(img, [224, 224]).div(tf.scalar(255));
+  img = tf.cast(img, (dtype = "float32"));
+
+  /*mean of natural image*/
+  let meanRgb = { red: 0.485, green: 0.456, blue: 0.406 };
+
+  /* standard deviation of natural image*/
+  let stdRgb = { red: 0.229, green: 0.224, blue: 0.225 };
+
+  let indices = [
+    tf.tensor1d([0], "int32"),
+    tf.tensor1d([1], "int32"),
+    tf.tensor1d([2], "int32"),
+  ];
+
+  /* sperating tensor channelwise and applyin normalization to each chanel seperately */
+  let centeredRgb = {
+    red: tf
+      .gather(img, indices[0], 2)
+      .sub(tf.scalar(meanRgb.red))
+      .div(tf.scalar(stdRgb.red))
+      .reshape([224, 224]),
+
+    green: tf
+      .gather(img, indices[1], 2)
+      .sub(tf.scalar(meanRgb.green))
+      .div(tf.scalar(stdRgb.green))
+      .reshape([224, 224]),
+
+    blue: tf
+      .gather(img, indices[2], 2)
+      .sub(tf.scalar(meanRgb.blue))
+      .div(tf.scalar(stdRgb.blue))
+      .reshape([224, 224]),
+  };
+
+  /* combining seperate normalized channels*/
+  let processedImg = tf
+    .stack([centeredRgb.red, centeredRgb.green, centeredRgb.blue])
+    .expandDims();
+  return processedImg;
+}
