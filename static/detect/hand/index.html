@@ -22,6 +22,16 @@
             margin-top: 5%;
         }
 
+        .canvasbox {
+            border-radius: 3px;
+            margin-right: 10px;
+            width: 450px;
+            height: 338px;
+            border-bottom: 3px solid #0063ff;
+            box-shadow: 0 2px 3px 0 rgba(0, 0, 0, 0.2), 0 4px 10px 0 #00000030;
+            background: #333;
+        }
+
         .camView {
             position: relative;
             float: left;
@@ -30,7 +40,7 @@
             cursor: pointer;
         }
 
-        video {
+        video, canvas {
             /* override other styles to make responsive */
             width: 100%    !important;
             height: auto   !important;
@@ -41,14 +51,19 @@
 
     <div class="container main-area">
         <div class="row">
+            <div class="col-sm-12">
+                <div id="updatenote">Loading the model...</div>
+            </div>
+        </div>
+        <div class="row">
           <div class="col-sm-6">
             <div class="d-flex justify-content-center camView" id="liveView">
-                <video id="webcam" autoplay></video>
+                <video id="webcam"style="display: none;" autoplay></video>
+                <canvas id="canvas"></canvas>
             </div>
 
             <div class="text-center" style="margin-top: 4%;">
-                <button id="webcamButton" type="button" class="btn btn-outline-dark" style="margin-right: 10px;">Capture</button>
-                <button id="webcamButtonDisable" type="button" class="btn btn-outline-dark" style="margin-left: 10px;">Stop</button>
+                <button id="webcamButton" onclick="toggleVideo()" type="button" class="btn btn-outline-dark" style="margin-right: 10px;">Capture</button>
             </div>
           </div>
           <div class="col-sm-6">
