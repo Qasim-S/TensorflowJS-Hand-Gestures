@@ -10,7 +10,7 @@ let model = null;
 
 (async function () {
   staticGestureModel = await tf.loadGraphModel(
-    "http://localhost:81/tfjs-models/EfficientNetB0/model.json"
+    "http://localhost:81/tfjs-models/EfficientNetB0/english/model.json"
   );
 })();
 
@@ -85,6 +85,9 @@ function runDetection() {
           .predict(crop)
           .data()
           .then((predictions) => {
+            crop.dispose();
+            imgTensor.dispose();
+            boxes.dispose();
             console.log("Got predictions...", predictions);
             let top5 = Array.from(predictions)
               .map(function (p, i) {
@@ -103,7 +106,7 @@ function runDetection() {
               $("#prediction-list").append(
                 `<li class="list-group-item">${
                   p.className
-                }<span class="badge">${
+                }<span class="badge" style="color:#000000">${
                   p.probability.toFixed(3) * 100
                 } %</span></li>`
               );
