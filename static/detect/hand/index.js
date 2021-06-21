@@ -49,20 +49,35 @@ function runDetection() {
       if (prediction.label != "face") {
         let imgTensor = tf.browser.fromPixels(video);
 
+        boxes = [];
+        box = [
+          prediction.bbox[1] / imgTensor.shape[0],
+          prediction.bbox[0] / imgTensor.shape[1],
+          (prediction.bbox[1] + prediction.bbox[3]) / imgTensor.shape[0],
+          (prediction.bbox[0] + prediction.bbox[2]) / imgTensor.shape[1],
+        ];
+        boxes.push(box);
+
         let crop = tf.image.cropAndResize(
-          imgTensor.expandDims(),
-          tf.tensor(prediction.bbox).reshape([1, 4]),
+          imgTensor.reverse(1).expandDims(),
+          tf.tensor(boxes).reshape([1, 4]),
           [0],
           [224, 224]
         );
 
-        tf.browser.toPixels(imgTensor.reverse(1), croppedCanvas).then(() => {
-          crop.dispose();
-        });
+        // changing the crop from Int32 to Float32
+        crop = tf.image.resizeBilinear(crop, [224, 224]).div(tf.scalar(255));
+        crop = tf.cast(crop, (dtype = "float32"));
+
+        tf.browser
+          .toPixels(crop.reshape([224, 224, 3]), croppedCanvas)
+          .then(() => {
+            crop.dispose();
+          });
       }
     });
     if (isVideo) {
-      //requestAnimationFrame(runDetection);
+      requestAnimationFrame(runDetection);
     }
   });
 }
@@ -75,46 +90,21 @@ handTrack.load(modelParams).then((lmodel) => {
   trackButton.disabled = false;
 });
 
-function imgTransform(img) {
-  img = tf.image.resizeBilinear(img, [224, 224]).div(tf.scalar(255));
-  img = tf.cast(img, (dtype = "float32"));
+function toGrayScale(img) {
+  // the scalars needed for conversion of each channel
+  // per the formula: gray = 0.2989 * R + 0.5870 * G + 0.1140 * B
+  rFactor = tf.scalar(0.2989);
+  gFactor = tf.scalar(0.587);
+  bFactor = tf.scalar(0.114);
 
-  /*mean of natural image*/
-  let meanRgb = { red: 0.485, green: 0.456, blue: 0.406 };
+  // separate out each channel. x.shape[0] and x.shape[1] will give you
+  // the correct dimensions regardless of image size
+  r = img.slice([0, 0, 0], [img.shape[0], img.shape[1], 1]);
+  g = img.slice([0, 0, 1], [img.shape[0], img.shape[1], 1]);
+  b = img.slice([0, 0, 2], [img.shape[0], img.shape[1], 1]);
 
-  /* standard deviation of natural image*/
-  let stdRgb = { red: 0.229, green: 0.224, blue: 0.225 };
+  // add all the tensors together, as they should all be the same dimensions.
+  gray = r.mul(rFactor).add(g.mul(gFactor)).add(b.mul(bFactor));
 
-  let indices = [
-    tf.tensor1d([0], "int32"),
-    tf.tensor1d([1], "int32"),
-    tf.tensor1d([2], "int32"),
-  ];
-
-  /* sperating tensor channelwise and applyin normalization to each chanel seperately */
-  let centeredRgb = {
-    red: tf
-      .gather(img, indices[0], 2)
-      .sub(tf.scalar(meanRgb.red))
-      .div(tf.scalar(stdRgb.red))
-      .reshape([224, 224]),
-
-    green: tf
-      .gather(img, indices[1], 2)
-      .sub(tf.scalar(meanRgb.green))
-      .div(tf.scalar(stdRgb.green))
-      .reshape([224, 224]),
-
-    blue: tf
-      .gather(img, indices[2], 2)
-      .sub(tf.scalar(meanRgb.blue))
-      .div(tf.scalar(stdRgb.blue))
-      .reshape([224, 224]),
-  };
-
-  /* combining seperate normalized channels*/
-  let processedImg = tf
-    .stack([centeredRgb.red, centeredRgb.green, centeredRgb.blue])
-    .expandDims();
-  return processedImg;
+  return gray;
 }
