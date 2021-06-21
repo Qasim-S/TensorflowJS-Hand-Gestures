@@ -70,15 +70,18 @@
             <div class="d-flex justify-content-center">
                 <h1>Predictions</h1>  
             </div>
-            <div class="d-flex justify-content-center">
-                <canvas id="croppedImage"></canvas>  
+            <div class="d-flex justify-content-center"">
+                <ul class="list-group" id="prediction-list"></ul>
+                <!-- <canvas id="croppedImage"></canvas> -->
             </div>
           </div>
         </div>
     </div>
 
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.3.0/dist/tf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/handtrackjs/dist/handtrack.min.js"> </script>
+    <script src="../../statichandgesture-english-classes.js"></script>
     <script src="index.js"></script>
 </body>
 </html>

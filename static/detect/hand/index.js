@@ -8,6 +8,12 @@ let croppedCanvas = document.getElementById("croppedImage");
 let isVideo = false;
 let model = null;
 
+(async function () {
+  staticGestureModel = await tf.loadGraphModel(
+    "http://localhost:81/tfjs-models/EfficientNetB0/model.json"
+  );
+})();
+
 const modelParams = {
   flipHorizontal: true, // flip e.g for video
   maxNumBoxes: 20, // maximum number of boxes to detect
@@ -65,14 +71,43 @@ function runDetection() {
           [224, 224]
         );
 
-        // changing the crop from Int32 to Float32
-        crop = tf.image.resizeBilinear(crop, [224, 224]).div(tf.scalar(255));
-        crop = tf.cast(crop, (dtype = "float32"));
+        crop = crop.resizeNearestNeighbor([224, 224]).toFloat();
 
-        tf.browser
-          .toPixels(crop.reshape([224, 224, 3]), croppedCanvas)
-          .then(() => {
-            crop.dispose();
+        // More pre-processing to be added here later
+        // tf.browser
+        //   .toPixels(crop.reshape([224, 224, 3]), croppedCanvas)
+        //   .then(() => {
+        //     crop.dispose();
+        //   });
+
+        console.log("Getting predictions...");
+        staticGestureModel
+          .predict(crop)
+          .data()
+          .then((predictions) => {
+            console.log("Got predictions...", predictions);
+            let top5 = Array.from(predictions)
+              .map(function (p, i) {
+                return {
+                  probability: p,
+                  className: STATICHANDGESTURE_ENGLISH_CLASSES[i],
+                };
+              })
+              .sort(function (a, b) {
+                return b.probability - a.probability;
+              })
+              .slice(0, 5);
+
+            $("#prediction-list").empty();
+            top5.forEach(function (p) {
+              $("#prediction-list").append(
+                `<li class="list-group-item">${
+                  p.className
+                }<span class="badge">${
+                  p.probability.toFixed(3) * 100
+                } %</span></li>`
+              );
+            });
           });
       }
     });
@@ -89,22 +124,3 @@ handTrack.load(modelParams).then((lmodel) => {
   updateNote.innerText = "Loaded Model!";
   trackButton.disabled = false;
 });
-
-function toGrayScale(img) {
-  // the scalars needed for conversion of each channel
-  // per the formula: gray = 0.2989 * R + 0.5870 * G + 0.1140 * B
-  rFactor = tf.scalar(0.2989);
-  gFactor = tf.scalar(0.587);
-  bFactor = tf.scalar(0.114);
-
-  // separate out each channel. x.shape[0] and x.shape[1] will give you
-  // the correct dimensions regardless of image size
-  r = img.slice([0, 0, 0], [img.shape[0], img.shape[1], 1]);
-  g = img.slice([0, 0, 1], [img.shape[0], img.shape[1], 1]);
-  b = img.slice([0, 0, 2], [img.shape[0], img.shape[1], 1]);
-
-  // add all the tensors together, as they should all be the same dimensions.
-  gray = r.mul(rFactor).add(g.mul(gFactor)).add(b.mul(bFactor));
-
-  return gray;
-}
