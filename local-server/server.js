@@ -9,7 +9,6 @@ router.get(function (req, res, next) {
 });
 
 app.use(express.static("../static"));
-app.use("/", router);
 
 app.listen(81, function () {
   console.log("Serving static on 81");
