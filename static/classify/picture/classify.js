@@ -15,7 +15,7 @@ $(function () {
 
 (async function () {
   model = await tf.loadGraphModel(
-    "http://localhost:81/tfjs-models/EfficientNetB0/model.json"
+    "http://localhost:81/tfjs-models/EfficientNetB0/english/model.json"
   );
   $(".progress-bar").hide();
 })();

@@ -112,7 +112,7 @@
 // // script tag import so ignore any warning in Glitch.
 (async function () {
   model = await tf.loadGraphModel(
-    "http://localhost:81/tfjs-models/EfficientNetB0/model.json"
+    "http://localhost:81/tfjs-models/EfficientNetB0/english/model.json"
   );
   //   demosSection.classList.remove("invisible");
 })();

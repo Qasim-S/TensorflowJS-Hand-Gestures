@@ -85,9 +85,6 @@ function runDetection() {
           .predict(crop)
           .data()
           .then((predictions) => {
-            crop.dispose();
-            imgTensor.dispose();
-            boxes.dispose();
             console.log("Got predictions...", predictions);
             let top5 = Array.from(predictions)
               .map(function (p, i) {
