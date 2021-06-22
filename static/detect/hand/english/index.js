@@ -1,3 +1,5 @@
+$.getScript("../../../statichandgesture-classes.js");
+
 const video = document.getElementById("webcam");
 const canvas = document.getElementById("canvas");
 const context = canvas.getContext("2d");
@@ -90,7 +92,7 @@ function runDetection() {
               .map(function (p, i) {
                 return {
                   probability: p,
-                  className: STATICHANDGESTURE_ENGLISH_CLASSES[i],
+                  className: ENGLISH_CLASSES[i],
                 };
               })
               .sort(function (a, b) {
