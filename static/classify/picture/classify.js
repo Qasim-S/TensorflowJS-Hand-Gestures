@@ -1,3 +1,5 @@
+$.getScript("../../statichandgesture-classes.js");
+
 $("#image-selector").change(function () {
   let reader = new FileReader();
   reader.onload = function () {
@@ -37,7 +39,7 @@ $("#predict-button").click(async function () {
     .map(function (p, i) {
       return {
         probability: p,
-        className: STATICHANDGESTURE_ENGLISH_CLASSES[i],
+        className: ENGLISH_CLASSES[i],
       };
     })
     .sort(function (a, b) {

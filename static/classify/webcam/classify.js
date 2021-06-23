@@ -1,3 +1,5 @@
+$.getScript("../../../statichandgesture-classes.js");
+
 // /**
 //  * @license
 //  * Copyright 2018 Google LLC. All Rights Reserved.
@@ -114,6 +116,7 @@
   model = await tf.loadGraphModel(
     "http://localhost:81/tfjs-models/EfficientNetB0/english/model.json"
   );
+  console.log("Model Loaded!");
   //   demosSection.classList.remove("invisible");
 })();
 
@@ -173,12 +176,13 @@ async function webcamLaunch() {
 
     console.log("Getting predictions...");
     let predictions = await model.predict(tensor).data();
+    // tensor.dispose();
     console.log("Got predictions...");
     let top5 = Array.from(predictions)
       .map(function (p, i) {
         return {
           probability: p,
-          className: STATICHANDGESTURE_ENGLISH_CLASSES[i],
+          className: ENGLISH_CLASSES[i],
         };
       })
       .sort(function (a, b) {
