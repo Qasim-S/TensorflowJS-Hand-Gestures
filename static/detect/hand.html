@@ -4,22 +4,25 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" type="image/x-icon" href="../favicon.ico"/>
 
     <!-- Import the webpage's stylesheet -->
     <link rel="stylesheet" href="../style.css">
-    <title>Detect Hands</title>
+    <title>Gesture Predictor</title>
 </head>
 <body>
-    <a href="#section2">Click Me to Smooth Scroll to Section 2 Below</a>
-
-    <div class="main">
+    <div class="main" id="section1" style="background-color:yellow">
+      <section>
+        <a href="#section2">Down!</a>
+      </section>
+    </div>
+    
+    <div class="main" id="section2"  style="background-color:blue">
+      <a href="#section1">Up!</a>
       <section></section>
     </div>
     
-    <div class="main" id="section2">
-      <section style="background-color:blue"></section>
-    </div>
-    
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
     <script src="detect.js"></script>
 </body>
 </html>
