@@ -10,12 +10,6 @@ let croppedCanvas = document.getElementById("croppedImage");
 let isVideo = false;
 let model = null;
 
-(async function () {
-  staticGestureModel = await tf.loadGraphModel(
-    "../../../tfjs-models/EfficientNetB0/urdu/model.json"
-  );
-})();
-
 const modelParams = {
   flipHorizontal: true, // flip e.g for video
   maxNumBoxes: 20, // maximum number of boxes to detect
@@ -82,35 +76,42 @@ function runDetection() {
         //     crop.dispose();
         //   });
 
-        console.log("Getting predictions...");
-        staticGestureModel
-          .predict(crop)
-          .data()
-          .then((predictions) => {
-            console.log("Got predictions...", predictions);
-            let top5 = Array.from(predictions)
-              .map(function (p, i) {
-                return {
-                  probability: p,
-                  className: URDU_CLASSES[i],
-                };
-              })
-              .sort(function (a, b) {
-                return b.probability - a.probability;
-              })
-              .slice(0, 5);
+        tf.loadGraphModel(
+          "../../../tfjs-models/EfficientNetB0/urdu/model.json"
+        ).then((staticGestureModel) => {
+          console.log("Loaded Gesture Model...");
+          console.log("Getting predictions...");
+          staticGestureModel
+            .predict(crop)
+            .data()
+            .then((predictions) => {
+              imgTensor.dispose();
+              crop.dispose();
+              console.log("Got predictions...", predictions);
+              let top5 = Array.from(predictions)
+                .map(function (p, i) {
+                  return {
+                    probability: p,
+                    className: URDU_CLASSES[i],
+                  };
+                })
+                .sort(function (a, b) {
+                  return b.probability - a.probability;
+                })
+                .slice(0, 5);
 
-            $("#prediction-list").empty();
-            top5.forEach(function (p) {
-              $("#prediction-list").append(
-                `<li class="list-group-item">${
-                  p.className
-                }<span class="badge" style="color:#000000">${
-                  p.probability.toFixed(3) * 100
-                } %</span></li>`
-              );
+              $("#prediction-list").empty();
+              top5.forEach(function (p) {
+                $("#prediction-list").append(
+                  `<li class="list-group-item">${
+                    p.className
+                  }<span class="badge" style="color:#000000">${
+                    p.probability.toFixed(3) * 100
+                  } %</span></li>`
+                );
+              });
             });
-          });
+        });
       }
     });
     if (isVideo) {
