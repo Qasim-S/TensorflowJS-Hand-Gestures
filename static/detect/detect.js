@@ -7,7 +7,7 @@ $(document).ready(function () {
         {
           scrollTop: $(hash).offset().top,
         },
-        800,
+        350,
         function () {
           window.location.hash = hash;
         }
@@ -15,3 +15,15 @@ $(document).ready(function () {
     }
   });
 });
+
+function englishModel() {
+  $("#section2").css("background-color", "green");
+}
+
+function urduModel() {
+  $("#section2").css("background-color", "purple");
+}
+
+function numberModel() {
+  $("#section2").css("background-color", "blue");
+}
