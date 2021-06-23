@@ -3,6 +3,8 @@ let app = express();
 const path = require("path");
 const router = express.Router();
 
+const PORT = process.env.PORT || 81;
+
 router.get(function (req, res, next) {
   console.log(`${new Date()} - ${req.method} request for ${req.url}`);
   next();
@@ -15,6 +17,6 @@ app.get("/", (req, res, next) => {
 
 app.use(express.static("./static"));
 
-app.listen(81, function () {
+app.listen(PORT, function () {
   console.log("Serving static on 81");
 });
