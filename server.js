@@ -10,13 +10,8 @@ router.get(function (req, res, next) {
   next();
 });
 
-app.get("/", (req, res, next) => {
-  res.send("<h1>Server is Up</h1>");
-  next();
-});
-
 app.use(express.static("./static"));
 
 app.listen(PORT, function () {
-  console.log("Serving static on 81");
+  console.log(`Serving static on ${PORT}`);
 });
