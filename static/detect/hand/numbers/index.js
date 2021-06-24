@@ -69,9 +69,9 @@ function runDetection() {
 
         crop = crop.resizeNearestNeighbor([224, 224]).toFloat();
 
-        // More pre-processing to be added here later
+        //More pre-processing to be added here later
         // tf.browser
-        //   .toPixels(crop.reshape([224, 224, 3]), croppedCanvas)
+        //   .toPixels(crop.div(255).reshape([224, 224, 3]), croppedCanvas)
         //   .then(() => {
         //     crop.dispose();
         //   });
